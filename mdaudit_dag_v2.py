@@ -325,7 +325,7 @@ default_args = {
     'retry_delay': dt.timedelta(minutes=30),
 }
 with DAG(
-        'MD_Audit',
+        'MD_Audit_v2',
         default_args=default_args,
         description='Получение данных из MD Audit.',
         start_date=days_ago(1),
