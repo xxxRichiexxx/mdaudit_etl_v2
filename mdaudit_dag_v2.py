@@ -358,7 +358,7 @@ with DAG(
         aux_mdaudit_regions = VerticaOperator(
             task_id='update_dds_mdaudit_regions',
             vertica_conn_id='vertica',
-            sql='aux_mdaudit_region.sql',
+            sql='dds_mdaudit_region.sql',
         )
 
         tables = (
@@ -382,13 +382,13 @@ with DAG(
         aux_mdaudit_checks = VerticaOperator(
             task_id='update_dds_mdaudit_checks',
             vertica_conn_id='vertica',
-            sql='aux_mdaudit_checks.sql',
+            sql='dds_mdaudit_checks.sql',
         )
 
         aux_mdaudit_answers = VerticaOperator(
             task_id='update_dds_mdaudit_answers',
             vertica_conn_id='vertica',
-            sql='aux_mdaudit_answers.sql',
+            sql='dds_mdaudit_answers.sql',
         )
 
         aux_mdaudit_regions >> parallel_tasks >> aux_mdaudit_checks >> aux_mdaudit_answers
