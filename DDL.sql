@@ -82,14 +82,14 @@ CREATE TABLE IF NOT EXISTS sttgaz.stage_mdaudit_shops(
 
 -- DDS --
 
-CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_regions(
+CREATE TABLE IF NOT EXISTS sttgaz.dds_mdaudit_regions(
     id AUTO_INCREMENT PRIMARY KEY,
     region_id BIGINT NOT NULL UNIQUE,
     region_name VARCHAR(2000) NOT NULL
 );
 
 
-CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_shops(
+CREATE TABLE IF NOT EXISTS sttgaz.dds_mdaudit_shops(
     id AUTO_INCREMENT PRIMARY KEY,
     shop_id BIGINT NOT NULL UNIQUE,
     active BOOLEAN,
@@ -99,23 +99,23 @@ CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_shops(
     city VARCHAR(255),
     latitude Numeric(20,10),
     longitude Numeric(20,10),
-    region_id BIGINT REFERENCES sttgaz.aux_mdaudit_regions(id)
+    region_id BIGINT REFERENCES sttgaz.dds_mdaudit_regions(id)
 );
 
 
-CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_divisions(
+CREATE TABLE IF NOT EXISTS sttgaz.dds_mdaudit_divisions(
     id AUTO_INCREMENT PRIMARY KEY,
     division_id BIGINT NOT NULL UNIQUE,
     division_name VARCHAR(2000) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_templates(
+CREATE TABLE IF NOT EXISTS sttgaz.dds_mdaudit_templates(
     id AUTO_INCREMENT PRIMARY KEY,
     template_id BIGINT NOT NULL UNIQUE,
     template_name VARCHAR(2000) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_resolvers(
+CREATE TABLE IF NOT EXISTS sttgaz.dds_mdaudit_resolvers(
     id AUTO_INCREMENT PRIMARY KEY,
     resolver_id BIGINT NOT NULL UNIQUE,
     resolver_first_name VARCHAR,
@@ -124,13 +124,13 @@ CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_resolvers(
 
 
 
-CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_checks(
+CREATE TABLE IF NOT EXISTS sttgaz.dds_mdaudit_checks(
     id AUTO_INCREMENT PRIMARY KEY,
     check_id BIGINT NOT NULL UNIQUE,
-    template_id BIGINT NOT NULL REFERENCES sttgaz.aux_mdaudit_templates(id),
-    shop_id BIGINT NOT NULL REFERENCES sttgaz.aux_mdaudit_shops(id),
-    division_id INT NOT NULL REFERENCES sttgaz.aux_mdaudit_divisions(id),
-    resolver_id BIGINT NOT NULL REFERENCES sttgaz.aux_mdaudit_resolvers(id),
+    template_id BIGINT NOT NULL REFERENCES sttgaz.dds_mdaudit_templates(id),
+    shop_id BIGINT NOT NULL REFERENCES sttgaz.dds_mdaudit_shops(id),
+    division_id INT NOT NULL REFERENCES sttgaz.dds_mdaudit_divisions(id),
+    resolver_id BIGINT NOT NULL REFERENCES sttgaz.dds_mdaudit_resolvers(id),
     resolve_date DATE,
     start_time TIMESTAMP,
     finish_time TIMESTAMP,
@@ -143,10 +143,10 @@ CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_checks(
 );
 
 
-CREATE TABLE IF NOT EXISTS sttgaz.aux_mdaudit_answers(
+CREATE TABLE IF NOT EXISTS sttgaz.dds_mdaudit_answers(
     id AUTO_INCREMENT PRIMARY KEY,
     answer_id BIGINT NOT NULL UNIQUE,
-    check_id BIGINT NOT NULL REFERENCES sttgaz.aux_mdaudit_checks(id),
+    check_id BIGINT NOT NULL REFERENCES sttgaz.dds_mdaudit_checks(id),
     question_id BIGINT NOT NULL,
     name VARCHAR(3000) NOT NULL,
     answer NUMERIC(6,3) NOT NULL,

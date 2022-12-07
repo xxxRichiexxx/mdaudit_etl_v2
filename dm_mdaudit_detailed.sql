@@ -49,18 +49,18 @@ SELECT
 	ELSE
 		DATE_TRUNC('month', c.finish_time)::date
 	END 														AS "Дата для агрегации"	
-FROM sttgaz.aux_mdaudit_answers 		AS a
-LEFT JOIN sttgaz.aux_mdaudit_checks 	AS c
+FROM sttgaz.dds_mdaudit_answers 		AS a
+LEFT JOIN sttgaz.dds_mdaudit_checks 	AS c
 	ON a.check_id = c.id 
-LEFT JOIN sttgaz.aux_mdaudit_shops 		AS s 
+LEFT JOIN sttgaz.dds_mdaudit_shops 		AS s 
 	ON c.shop_id = s.id 
-LEFT JOIN sttgaz.aux_mdaudit_divisions 	AS d 
+LEFT JOIN sttgaz.dds_mdaudit_divisions 	AS d 
 	ON c.division_id = d.id 
-LEFT JOIN sttgaz.aux_mdaudit_resolvers 	AS r
+LEFT JOIN sttgaz.dds_mdaudit_resolvers 	AS r
 	ON c.resolver_id = r.id 
-LEFT JOIN sttgaz.aux_mdaudit_templates 	AS t 
+LEFT JOIN sttgaz.dds_mdaudit_templates 	AS t 
 	ON c.template_id = t.id 
-LEFT JOIN sttgaz.aux_mdaudit_regions 	AS reg 
+LEFT JOIN sttgaz.dds_mdaudit_regions 	AS reg 
 	ON s.region_id = reg.id
 WHERE a.answer <> 100
 	AND ("Дата для агрегации" > (NOW() - INTERVAL '13 MONTH'))
