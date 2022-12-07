@@ -9,13 +9,13 @@ INSERT INTO sttgaz.stage_checks (table_name, check_name, ts, check_result)
 			SELECT COUNT(DISTINCT check_id) FROM sttgaz.stage_mdaudit_answers
 		),
 		sq4 AS(
-			SELECT COUNT(check_id) FROM sttgaz.aux_mdaudit_checks
+			SELECT COUNT(check_id) FROM sttgaz.dds_mdaudit_checks
 		),
 		sq5 AS(
-			SELECT COUNT(DISTINCT check_id) FROM sttgaz.aux_mdaudit_checks
+			SELECT COUNT(DISTINCT check_id) FROM sttgaz.dds_mdaudit_checks
 		),
 		sq6 AS(
-			SELECT COUNT(DISTINCT check_id) FROM sttgaz.aux_mdaudit_answers
+			SELECT COUNT(DISTINCT check_id) FROM sttgaz.dds_mdaudit_answers
 		),
 		sq7 AS(
 			SELECT 
@@ -27,7 +27,7 @@ INSERT INTO sttgaz.stage_checks (table_name, check_name, ts, check_result)
 		
 		)
 		SELECT
-			'stage_mdaudit_checks, stage_mdaudit_answers, aux_mdaudit_checks,  aux_mdaudit_checks',
+			'stage_mdaudit_checks, stage_mdaudit_answers, dds_mdaudit_checks,  dds_mdaudit_checks',
 			'checking_for_duplicates',
 			NOW(),
 			(SELECT * FROM sq7);
