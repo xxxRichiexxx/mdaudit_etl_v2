@@ -361,10 +361,10 @@ with DAG(
         )
 
         tables = (
-            'aux_mdaudit_shops',
-            'aux_mdaudit_divisions',
-            'aux_mdaudit_templates',
-            'aux_mdaudit_resolvers',
+            'dds_mdaudit_shops',
+            'dds_mdaudit_divisions',
+            'dds_mdaudit_templates',
+            'dds_mdaudit_resolvers',
         )
 
         parallel_tasks = []
