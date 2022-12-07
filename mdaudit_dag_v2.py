@@ -135,7 +135,7 @@ def checks_and_answers(data):
         'answers',
         ['id', 'shop_id'],
         meta_prefix = "check_"
-    )
+    ).rename({'check_shop_id': 'shop_id'}, axis=1)
 
     print(answers)
 
