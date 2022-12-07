@@ -339,13 +339,13 @@ with DAG(
     with TaskGroup('Загрузка_данных_в_stage_слой') as data_to_stage:
 
         get_checks_and_answers = PythonOperator(
-            task_id='Получение_данных_об_опросах_и_ответах',
+            task_id='get_checks_and_answers',
             python_callable=get_data,
             op_kwargs={'data_type': 'checks_and_answers'}
         )
 
         get_shops = PythonOperator(
-            task_id='Получение_данных_об_объектах опроса',
+            task_id='get_shops',
             python_callable=get_data,
             op_kwargs={'data_type': 'shops'}
         )
@@ -355,7 +355,7 @@ with DAG(
     with TaskGroup('Формирование_слоя_DDS') as data_to_dds:
 
         aux_mdaudit_regions = VerticaOperator(
-            task_id='update_aux_mdaudit_regions',
+            task_id='update_dds_mdaudit_regions',
             vertica_conn_id='vertica',
             sql='aux_mdaudit_region.sql',
         )
@@ -379,13 +379,13 @@ with DAG(
             )
 
         aux_mdaudit_checks = VerticaOperator(
-            task_id='update_aux_mdaudit_checks',
+            task_id='update_dds_mdaudit_checks',
             vertica_conn_id='vertica',
             sql='aux_mdaudit_checks.sql',
         )
 
         aux_mdaudit_answers = VerticaOperator(
-            task_id='update_aux_mdaudit_answers',
+            task_id='update_dds_mdaudit_answers',
             vertica_conn_id='vertica',
             sql='aux_mdaudit_answers.sql',
         )
