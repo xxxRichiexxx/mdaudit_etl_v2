@@ -133,7 +133,8 @@ def checks_and_answers(data):
     answers = pd.json_normalize(
         data,
         'answers',
-        'id'
+        ['id', 'shop_id'],
+        meta_prefix = "check_"
     )
 
     print(answers)
