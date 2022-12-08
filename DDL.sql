@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS sttgaz.stage_workflow_status (
     workflow_settings  VARCHAR NOT NULL
 );
 
-CREATE TABLE sttgaz.stage_checks(
+CREATE TABLE IF NOT EXISTS sttgaz.stage_checks(
 	id AUTO_INCREMENT,
 	table_name VARCHAR(100),
 	check_name VARCHAR(100),

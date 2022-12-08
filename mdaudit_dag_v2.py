@@ -96,36 +96,12 @@ def checks_and_answers(data):
         engine
     )
 
-    # updatedict = {
-    #     'id': sa.sql.sqltypes.BIGINT,
-    #     'template_id': sa.sql.sqltypes.BIGINT,
-    #     'template_name': sa.sql.sqltypes.VARCHAR(2000),
-    #     'shop_id': sa.sql.sqltypes.BIGINT,
-    #     'shop_sap': sa.sql.sqltypes.VARCHAR(2000),
-    #     'shop_locality': sa.sql.sqltypes.VARCHAR(2000),
-    #     'region_id': sa.sql.sqltypes.BIGINT,
-    #     'region_name': sa.sql.sqltypes.VARCHAR(2000),
-    #     'division_id': sa.sql.sqltypes.BIGINT,
-    #     'division_name': sa.sql.sqltypes.VARCHAR,
-    #     'resolver_id': sa.sql.sqltypes.BIGINT,
-    #     'resolver_first_name': sa.sql.sqltypes.VARCHAR,
-    #     'resolver_last_name': sa.sql.sqltypes.VARCHAR,
-    #     'resolve_date': sa.sql.sqltypes.TIMESTAMP,
-    #     'start_time': sa.sql.sqltypes.TIMESTAMP,
-    #     'finish_time': sa.sql.sqltypes.TIMESTAMP,
-    #     'last_modified_at': sa.sql.sqltypes.TIMESTAMP,
-    #     'grade': sa.sql.sqltypes.FLOAT(53),
-    #     'comment': sa.sql.sqltypes.VARCHAR(8000),
-    #     'status': sa.sql.sqltypes.VARCHAR,
-    # }
-
     checks.to_sql(
         'stage_mdaudit_checks',
         engine,
         schema='sttgaz',
         if_exists='append',
         index=False,
-        # dtype=updatedict
     )
 
     result_check(checks_initial_data_volume_in_dwh, 'checks')
@@ -145,7 +121,6 @@ def checks_and_answers(data):
         schema='sttgaz',
         if_exists='append',
         index=False,
-        # dtype=updatedict
     )
 
     result_check(answers_initial_data_volume_in_dwh, 'answers')
