@@ -49,115 +49,84 @@ def result_check(initial_data_volume, table_name):
 
 #-------------- HANDLERS ---------------
 
-def checks_and_answers(data):
+def checks_and_answers(data, start_date):
     """
     Обрабатываем и записываем данные по проверкам и ответам.
     """
-    data = pd.json_normalize(
-        data,
-        record_path=['answers'],
-        meta=[
-            'id', 
-            'template_id',
-            'template_name',
-            'shop_id',
-            'shop_sap',
-            'shop_locality',
-            'region_id',
-            'region_name',
-            'division_id',
-            'division_name',
-            'resolver_id',
-            'resolver_first_name',
-            'resolver_last_name',
-            'resolve_date',
-            'start_time',
-            'finish_time',
-            'last_modified_at',
-            'grade',
-            'comment',
-            'status',
-        ],
-        meta_prefix='checks',
-        record_prefix='answers',
-        errors ='raise',
-        sep='.',
-        max_level=None
+
+    checks = pd.json_normalize(data).drop('answers', axis=1)
+    print(checks)
+
+    print('Обеспечение идемпотентности')
+
+    ids_for_del = tuple(checks['id'].values)
+
+    if len(ids_for_del) == 1:
+        query_part = f'= {ids_for_del[0]};'
+    else:
+        query_part = f'IN {ids_for_del};'
+
+    checks_initial_data_volume_in_dwh = pd.read_sql_query(
+        """
+        SELECT COUNT(*) FROM sttgaz.stage_mdaudit_checks
+        """,
+        engine
+    ).values[0][0]
+
+    answers_initial_data_volume_in_dwh = pd.read_sql_query(
+        """
+        SELECT COUNT(*) FROM sttgaz.stage_mdaudit_answers
+        """,
+        engine
+    ).values[0][0]
+
+    engine.execute(
+        f"""
+        DELETE FROM sttgaz.stage_mdaudit_checks
+        WHERE id {query_part}
+            OR (last_modified_at > '{start_date}' AND id NOT {query_part}
+        """
     )
-    print(data)
 
-    # print('Обеспечение идемпотентности')
+    pd.read_sql_query(
+        """
+        DELETE FROM sttgaz.stage_mdaudit_answers
+        WHERE check_id
+        """ + query_part,
+        engine
+    )
 
-    # ids_for_del = tuple(checks['id'].values)
+    checks.to_sql(
+        'stage_mdaudit_checks',
+        engine,
+        schema='sttgaz',
+        if_exists='append',
+        index=False,
+    )
 
-    # if len(ids_for_del) == 1:
-    #     query_part = f' = {ids_for_del[0]};'
-    # else:
-    #     query_part = f' IN {ids_for_del};'
+    result_check(checks_initial_data_volume_in_dwh, 'checks')
 
-    # checks_initial_data_volume_in_dwh = pd.read_sql_query(
-    #     """
-    #     SELECT COUNT(*) FROM sttgaz.stage_mdaudit_checks
-    #     """,
-    #     engine
-    # ).values[0][0]
+    answers = pd.json_normalize(
+        data,
+        'answers',
+        ['id', 'shop_id'],
+        meta_prefix = "check_"
+    ).rename({'check_shop_id': 'shop_id'}, axis=1)
 
-    # answers_initial_data_volume_in_dwh = pd.read_sql_query(
-    #     """
-    #     SELECT COUNT(*) FROM sttgaz.stage_mdaudit_answers
-    #     """,
-    #     engine
-    # ).values[0][0]
+    print(answers)
 
-    # pd.read_sql_query(
-    #     """
-    #     DELETE FROM sttgaz.stage_mdaudit_checks
-    #     WHERE id
-    #     """ + query_part,
-    #     engine
-    # )
+    answers.to_sql(
+        'stage_mdaudit_answers',
+        engine,
+        schema='sttgaz',
+        if_exists='append',
+        index=False,
+    )
 
-    # pd.read_sql_query(
-    #     """
-    #     DELETE FROM sttgaz.stage_mdaudit_answers
-    #     WHERE check_id
-    #     """ + query_part,
-    #     engine
-    # )
-
-    # checks.to_sql(
-    #     'stage_mdaudit_checks',
-    #     engine,
-    #     schema='sttgaz',
-    #     if_exists='append',
-    #     index=False,
-    # )
-
-    # result_check(checks_initial_data_volume_in_dwh, 'checks')
-
-    # answers = pd.json_normalize(
-    #     data,
-    #     'answers',
-    #     ['id', 'shop_id'],
-    #     meta_prefix = "check_"
-    # ).rename({'check_shop_id': 'shop_id'}, axis=1)
-
-    # print(answers)
-
-    # answers.to_sql(
-    #     'stage_mdaudit_answers',
-    #     engine,
-    #     schema='sttgaz',
-    #     if_exists='append',
-    #     index=False,
-    # )
-
-    # result_check(answers_initial_data_volume_in_dwh, 'answers')
-
-    # return max(checks['last_modified_at'])
+    result_check(answers_initial_data_volume_in_dwh, 'answers')
 
 
-def deleted_objects_searching(data_type, **context):
+# def deleted_objects_searching(data_type, **context):
     """
     Поиск и удаление объектов, которые были удалены в источнике.
     """
@@ -189,17 +158,11 @@ def deleted_objects_searching(data_type, **context):
             DELETE FROM sttgaz.stage_mdaudit_checks
             WHERE last_modified_at > '{start_searching_date}'
                 AND id NOT IN {ids};
-        
-            DELETE FROM sttgaz.stage_mdaudit_answers
-            WHERE check_id NOT IN (
-                SELECT id FROM sttgaz.stage_mdaudit_checks
-                WHERE last_modified_at > '{start_searching_date}'
-            );
             """
         )
 
 
-def shops(data):
+def shops(data, start_date):
     """
     Обрабатываем и записываем данные по СЦ/ДЦ и их руководству.
     """
@@ -288,7 +251,6 @@ def shops(data):
 
     result_check(shops_initial_data_volume_in_dwh, 'shops')
 
-    return dt.datetime.now()
 
 
 #------------- LAUNCHER --------------
@@ -336,19 +298,8 @@ def get_data(data_type, **context):
     if not data:
         print('Нет данных.')
     else:
-        data_types[data_type]['handler'](data)
 
-        # max_update_ts = data_types[data_type]['handler'](data)
-
-        # pd.read_sql_query(
-        #     f"""
-        #     INSERT INTO sttgaz.stage_workflow_status
-        #     (workflow_key,	workflow_settings)
-        #     VALUES
-        #     ('stage_mdaudit_{data_type}', '{max_update_ts}');
-        #     """,
-        #     engine
-        # )
+        data_types[data_type]['handler'](data, start_date)
 
 
 #-------------- DAG -----------------
