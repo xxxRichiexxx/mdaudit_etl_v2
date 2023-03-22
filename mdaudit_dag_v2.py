@@ -38,7 +38,7 @@ with DAG(
         default_args=default_args,
         description='Получение данных из MD Audit.',
         start_date=dt.datetime(2021, 1, 1),
-        schedule_interval='@yearly',
+        schedule_interval='@monthly',
         catchup=True,
         max_active_runs=1
 ) as dag:
