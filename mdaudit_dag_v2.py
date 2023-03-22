@@ -125,43 +125,7 @@ def checks_and_answers(data, start_date):
 
     result_check(answers_initial_data_volume_in_dwh, 'answers')
 
-
-# def deleted_objects_searching(data_type, **context):
-    """
-    Поиск и удаление объектов, которые были удалены в источнике.
-    """
-    start_searching_date = context['execution_date'].date() - dt.timedelta(days=90)
-
-    params = {
-        'last_modified_at': f'gt.{start_searching_date}'
-    }
-
-    response = requests.get(
-        data_types[data_type]['url'],
-        params=params,
-        headers=headers,
-        verify=False
-    )
-
-    response.raise_for_status()
-
-    data = pd.json_normalize(response.json())
-
-    if data.empty:
-        print('Нет данных.')
-    else:
-
-        ids = tuple(data['id'].drop_duplicates().values)
-
-        engine.execute(
-            f"""
-            DELETE FROM sttgaz.stage_mdaudit_checks
-            WHERE last_modified_at > '{start_searching_date}'
-                AND id NOT IN {ids};
-            """
-        )
-
-
+   
 def shops(data, start_date):
     """
     Обрабатываем и записываем данные по СЦ/ДЦ и их руководству.
