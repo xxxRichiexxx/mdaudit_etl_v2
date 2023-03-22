@@ -149,7 +149,7 @@ def deleted_objects_searching(data_type, **context):
 
     data = pd.json_normalize(response.json())
 
-    if not data:
+    if data.empty:
         print('Нет данных.')
     else:
 
