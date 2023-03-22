@@ -336,13 +336,13 @@ with DAG(
             op_kwargs={'data_type': 'shops'}
         )
 
-        delete_objects = PythonOperator(
-            task_id='deleted_objects_searching',
-            python_callable=deleted_objects_searching,
-            op_kwargs={'data_type': 'checks_and_answers'}
-        )        
+        # delete_objects = PythonOperator(
+        #     task_id='deleted_objects_searching',
+        #     python_callable=deleted_objects_searching,
+        #     op_kwargs={'data_type': 'checks_and_answers'}
+        # )        
 
-        [get_checks_and_answers, get_shops] >> delete_objects
+        [get_checks_and_answers, get_shops]
 
     with TaskGroup('Формирование_слоя_DDS') as data_to_dds:
 
