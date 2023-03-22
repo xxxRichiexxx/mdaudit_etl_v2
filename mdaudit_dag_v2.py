@@ -55,7 +55,7 @@ def checks_and_answers(data):
     """
     data = pd.json_normalize(
         data,
-        record_path=[answers],
+        record_path=['answers'],
         meta=[
             'id', 
             'template_id',
