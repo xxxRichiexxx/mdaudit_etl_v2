@@ -83,7 +83,7 @@ def checks_and_answers(data, start_date, engine):
         index=False,
     )
 
-    result_check(checks_initial_data_volume_in_dwh, 'checks')
+    result_check(checks_initial_data_volume_in_dwh, 'checks', engine)
 
     answers = pd.json_normalize(
         data,
@@ -155,7 +155,7 @@ def shops(data, start_date, engine):
         dtype=updatedict
     )
 
-    result_check(dirs_initial_data_volume_in_dwh, 'dirs')
+    result_check(dirs_initial_data_volume_in_dwh, 'dirs', engine)
 
     df = pd.json_normalize(data, max_level=0)
     df = df.drop('dir', axis=1)
