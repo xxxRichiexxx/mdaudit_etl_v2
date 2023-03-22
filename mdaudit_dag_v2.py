@@ -78,8 +78,8 @@ def checks_and_answers(data):
             'comment',
             'status',
         ],
-        meta_prefix=None,
-        record_prefix=None,
+        meta_prefix='checks',
+        record_prefix='answers',
         errors ='raise',
         sep='.',
         max_level=None
