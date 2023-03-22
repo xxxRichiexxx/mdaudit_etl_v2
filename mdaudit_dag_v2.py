@@ -37,7 +37,7 @@ with DAG(
         'MD_Audit_v2',
         default_args=default_args,
         description='Получение данных из MD Audit.',
-        start_date=dt.datetime(2021, 1, 1),
+        start_date=days_ago(1),
         schedule_interval='@daily',
         catchup=True,
         max_active_runs=1
