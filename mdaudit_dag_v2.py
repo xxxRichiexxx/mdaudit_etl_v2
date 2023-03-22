@@ -53,79 +53,108 @@ def checks_and_answers(data):
     """
     Обрабатываем и записываем данные по проверкам и ответам.
     """
-
-    checks = pd.json_normalize(data).drop('answers', axis=1)
-    print(checks)
-
-    print('Обеспечение идемпотентности')
-
-    ids_for_del = tuple(checks['id'].values)
-
-    if len(ids_for_del) == 1:
-        query_part = f' = {ids_for_del[0]};'
-    else:
-        query_part = f' IN {ids_for_del};'
-
-    checks_initial_data_volume_in_dwh = pd.read_sql_query(
-        """
-        SELECT COUNT(*) FROM sttgaz.stage_mdaudit_checks
-        """,
-        engine
-    ).values[0][0]
-
-    answers_initial_data_volume_in_dwh = pd.read_sql_query(
-        """
-        SELECT COUNT(*) FROM sttgaz.stage_mdaudit_answers
-        """,
-        engine
-    ).values[0][0]
-
-    pd.read_sql_query(
-        """
-        DELETE FROM sttgaz.stage_mdaudit_checks
-        WHERE id
-        """ + query_part,
-        engine
-    )
-
-    pd.read_sql_query(
-        """
-        DELETE FROM sttgaz.stage_mdaudit_answers
-        WHERE check_id
-        """ + query_part,
-        engine
-    )
-
-    checks.to_sql(
-        'stage_mdaudit_checks',
-        engine,
-        schema='sttgaz',
-        if_exists='append',
-        index=False,
-    )
-
-    result_check(checks_initial_data_volume_in_dwh, 'checks')
-
-    answers = pd.json_normalize(
+    data = pd.json_normalize(
         data,
-        'answers',
-        ['id', 'shop_id'],
-        meta_prefix = "check_"
-    ).rename({'check_shop_id': 'shop_id'}, axis=1)
-
-    print(answers)
-
-    answers.to_sql(
-        'stage_mdaudit_answers',
-        engine,
-        schema='sttgaz',
-        if_exists='append',
-        index=False,
+        record_path=[answers],
+        meta=[
+            'id', 
+            'template_id',
+            'template_name',
+            'shop_id',
+            'shop_sap',
+            'shop_locality',
+            'region_id',
+            'region_name',
+            'division_id',
+            'division_name',
+            'resolver_id',
+            'resolver_first_name',
+            'resolver_last_name',
+            'resolve_date',
+            'start_time',
+            'finish_time',
+            'last_modified_at',
+            'grade',
+            'comment',
+            'status',
+        ],
+        meta_prefix=None,
+        record_prefix=None,
+        errors ='raise',
+        sep='.',
+        max_level=None
     )
+    print(data)
 
-    result_check(answers_initial_data_volume_in_dwh, 'answers')
+    # print('Обеспечение идемпотентности')
 
-    return max(checks['last_modified_at'])
+    # ids_for_del = tuple(checks['id'].values)
+
+    # if len(ids_for_del) == 1:
+    #     query_part = f' = {ids_for_del[0]};'
+    # else:
+    #     query_part = f' IN {ids_for_del};'
+
+    # checks_initial_data_volume_in_dwh = pd.read_sql_query(
+    #     """
+    #     SELECT COUNT(*) FROM sttgaz.stage_mdaudit_checks
+    #     """,
+    #     engine
+    # ).values[0][0]
+
+    # answers_initial_data_volume_in_dwh = pd.read_sql_query(
+    #     """
+    #     SELECT COUNT(*) FROM sttgaz.stage_mdaudit_answers
+    #     """,
+    #     engine
+    # ).values[0][0]
+
+    # pd.read_sql_query(
+    #     """
+    #     DELETE FROM sttgaz.stage_mdaudit_checks
+    #     WHERE id
+    #     """ + query_part,
+    #     engine
+    # )
+
+    # pd.read_sql_query(
+    #     """
+    #     DELETE FROM sttgaz.stage_mdaudit_answers
+    #     WHERE check_id
+    #     """ + query_part,
+    #     engine
+    # )
+
+    # checks.to_sql(
+    #     'stage_mdaudit_checks',
+    #     engine,
+    #     schema='sttgaz',
+    #     if_exists='append',
+    #     index=False,
+    # )
+
+    # result_check(checks_initial_data_volume_in_dwh, 'checks')
+
+    # answers = pd.json_normalize(
+    #     data,
+    #     'answers',
+    #     ['id', 'shop_id'],
+    #     meta_prefix = "check_"
+    # ).rename({'check_shop_id': 'shop_id'}, axis=1)
+
+    # print(answers)
+
+    # answers.to_sql(
+    #     'stage_mdaudit_answers',
+    #     engine,
+    #     schema='sttgaz',
+    #     if_exists='append',
+    #     index=False,
+    # )
+
+    # result_check(answers_initial_data_volume_in_dwh, 'answers')
+
+    # return max(checks['last_modified_at'])
 
 
 def deleted_objects_searching(data_type, **context):
@@ -276,34 +305,21 @@ data_types = {
 }
 
 
-def get_data(data_type):
+def get_data(data_type, **context):
     """
     Получение данных из API MDAudit,
-    сохранение их в DWH в неизменном виде.
+    сохранение их в DWH.
     """
 
     params = None
 
     if data_type == 'checks_and_answers':
 
-        df = pd.read_sql_query(
-            f"""
-            SELECT MAX(CAST(workflow_settings AS TIMESTAMP))
-            FROM sttgaz.stage_workflow_status
-            WHERE workflow_key = 'stage_mdaudit_{data_type}';
-            """,
-            engine
-        )
-
-        ts_from = df.values[0][0]
-
-        if not ts_from:
-            ts_from = '2021-01-01 00:00:00.000000'
-
-        print('Запрос данных из API c датой изменения от:', ts_from)
+        start_date = context['execution_date'].date() - dt.timedelta(days=90)
+        end_date = context['execution_date'].date().replace(month=12, day=31)
 
         params = {
-            'last_modified_at': f'gt.{ts_from}'
+            'and': f'(last_modified_at.gt.{start_date}, last_modified_at.lt.{end_date})'
         }
 
     response = requests.get(
@@ -320,18 +336,19 @@ def get_data(data_type):
     if not data:
         print('Нет данных.')
     else:
+        data_types[data_type]['handler'](data)
 
-        max_update_ts = data_types[data_type]['handler'](data)
+        # max_update_ts = data_types[data_type]['handler'](data)
 
-        pd.read_sql_query(
-            f"""
-            INSERT INTO sttgaz.stage_workflow_status
-            (workflow_key,	workflow_settings)
-            VALUES
-            ('stage_mdaudit_{data_type}', '{max_update_ts}');
-            """,
-            engine
-        )
+        # pd.read_sql_query(
+        #     f"""
+        #     INSERT INTO sttgaz.stage_workflow_status
+        #     (workflow_key,	workflow_settings)
+        #     VALUES
+        #     ('stage_mdaudit_{data_type}', '{max_update_ts}');
+        #     """,
+        #     engine
+        # )
 
 
 #-------------- DAG -----------------
