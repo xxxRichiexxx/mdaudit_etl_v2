@@ -162,10 +162,9 @@ def deleted_objects_searching(data_type, **context):
                 AND id NOT IN {ids};
         
             DELETE FROM sttgaz.stage_mdaudit_answers
-            WHERE check_id IN (
-                SELECT * FROM sttgaz.stage_mdaudit_checks
+            WHERE check_id NOT IN (
+                SELECT id FROM sttgaz.stage_mdaudit_checks
                 WHERE last_modified_at > '{start_searching_date}'
-                    AND id NOT IN {ids}
             );
             """
         )
@@ -382,7 +381,7 @@ with DAG(
         aux_mdaudit_regions = VerticaOperator(
             task_id='update_dds_mdaudit_regions',
             vertica_conn_id='vertica',
-            sql='dds_mdaudit_region.sql',
+            sql='scripts/dds_mdaudit_region.sql',
         )
 
         tables = (
@@ -399,20 +398,20 @@ with DAG(
                 VerticaOperator(
                     task_id=f'update_{table}',
                     vertica_conn_id='vertica',
-                    sql=f'{table}.sql',
+                    sql=f'scripts/{table}.sql',
                 )
             )
 
         aux_mdaudit_checks = VerticaOperator(
             task_id='update_dds_mdaudit_checks',
             vertica_conn_id='vertica',
-            sql='dds_mdaudit_checks.sql',
+            sql='scripts/dds_mdaudit_checks.sql',
         )
 
         aux_mdaudit_answers = VerticaOperator(
             task_id='update_dds_mdaudit_answers',
             vertica_conn_id='vertica',
-            sql='dds_mdaudit_answers.sql',
+            sql='scripts/dds_mdaudit_answers.sql',
         )
 
         aux_mdaudit_regions >> parallel_tasks >> aux_mdaudit_checks >> aux_mdaudit_answers
@@ -422,13 +421,13 @@ with DAG(
         dm_mdaudit_detailed = VerticaOperator(
             task_id='update_dm_mdaudit_detailed',
             vertica_conn_id='vertica',
-            sql='dm_mdaudit_detailed.sql',
+            sql='scripts/dm_mdaudit_detailed.sql',
         )
 
         dm_mdaudit_answers = VerticaOperator(
             task_id='update_dm_mdaudit_answers',
             vertica_conn_id='vertica',
-            sql='dm_mdaudit_answers.sql',
+            sql='scripts/dm_mdaudit_answers.sql',
         )
 
         [dm_mdaudit_detailed, dm_mdaudit_answers]
@@ -438,13 +437,13 @@ with DAG(
         check_1 = VerticaOperator(
             task_id='checking_for_duplicates',
             vertica_conn_id='vertica',
-            sql='checking_for_duplicates.sql'
+            sql='scripts/checking_for_duplicates.sql'
         )
 
         check_2 = VerticaOperator(
             task_id='checking_for_accuracy_of_execution',
             vertica_conn_id='vertica',
-            sql='checking_for_accuracy_of_execution.sql'
+            sql='scripts/checking_for_accuracy_of_execution.sql'
         )
 
         [check_1, check_2]
