@@ -225,13 +225,13 @@ def get_data(data_type, host, headers, engine, **context):
 
     if data_type == 'checks_and_answers':
 
-        # params = {
-        #     'and': f'(last_modified_at.gt.{start_date}, last_modified_at.lt.{end_date})'
-        # }
-
         params = {
-                'last_modified_at': f'gt.{start_date}'
-            }
+            'and': f'(last_modified_at.gt.{start_date}, last_modified_at.lt.{end_date})'
+        }
+
+        # params = {
+        #         'last_modified_at': f'gt.{start_date}'
+        #     }
 
 
     response = requests.get(
