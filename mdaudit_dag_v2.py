@@ -62,9 +62,9 @@ def checks_and_answers(data, start_date):
     ids_for_del = tuple(checks['id'].values)
 
     if len(ids_for_del) == 1:
-        query_part = f'= {ids_for_del[0]};'
+        query_part = f'= {ids_for_del[0]}'
     else:
-        query_part = f'IN {ids_for_del};'
+        query_part = f'IN {ids_for_del}'
 
     checks_initial_data_volume_in_dwh = pd.read_sql_query(
         """
