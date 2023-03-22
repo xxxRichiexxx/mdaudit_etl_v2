@@ -84,7 +84,7 @@ def checks_and_answers(data, start_date):
         f"""
         DELETE FROM sttgaz.stage_mdaudit_checks
         WHERE id {query_part}
-            OR (last_modified_at > '{start_date}' AND id NOT {query_part}
+            OR (last_modified_at > '{start_date}' AND id NOT {query_part})
         """
     )
 
@@ -275,10 +275,10 @@ def get_data(data_type, **context):
 
     params = None
 
-    if data_type == 'checks_and_answers':
+    start_date = context['execution_date'].date() - dt.timedelta(days=90)
+    end_date = context['execution_date'].date().replace(month=12, day=31)
 
-        start_date = context['execution_date'].date() - dt.timedelta(days=90)
-        end_date = context['execution_date'].date().replace(month=12, day=31)
+    if data_type == 'checks_and_answers':
 
         params = {
             'and': f'(last_modified_at.gt.{start_date}, last_modified_at.lt.{end_date})'
