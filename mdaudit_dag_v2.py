@@ -153,7 +153,7 @@ def deleted_objects_searching(data_type, **context):
         print('Нет данных.')
     else:
 
-        ids = tuple(data['id'].drop_duplicates().values())
+        ids = tuple(data['id'].drop_duplicates().values)
 
         engine.execute(
             f"""
