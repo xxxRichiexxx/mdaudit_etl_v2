@@ -128,6 +128,49 @@ def checks_and_answers(data):
     return max(checks['last_modified_at'])
 
 
+def deleted_objects_searching(data_type, **context):
+    """
+    Поиск и удаление объектов, которые были удалены в источнике.
+    """
+    start_searching_date = context['execution_date'].date() - dt.timedelta(days=90)
+
+    params = {
+        'last_modified_at': f'gt.{start_searching_date}'
+    }
+
+    response = requests.get(
+        data_types[data_type]['url'],
+        params=params,
+        headers=headers,
+        verify=False
+    )
+
+    response.raise_for_status()
+
+    data = response.json()
+
+    if not data:
+        print('Нет данных.')
+    else:
+
+        ids = tuple(data['id'].drop_duplicates().values())
+
+        engine.execute(
+            f"""
+            DELETE FROM sttgaz.stage_mdaudit_checks
+            WHERE last_modified_at > '{start_searching_date}'
+                AND id NOT IN {ids};
+        
+            DELETE FROM sttgaz.stage_mdaudit_answers
+            WHERE check_id IN (
+                SELECT * FROM sttgaz.stage_mdaudit_checks
+                WHERE last_modified_at > '{start_searching_date}'
+                    AND id NOT IN {ids}
+            );
+            """
+        )
+
+
 def shops(data):
     """
     Обрабатываем и записываем данные по СЦ/ДЦ и их руководству.
@@ -326,7 +369,13 @@ with DAG(
             op_kwargs={'data_type': 'shops'}
         )
 
-        [get_checks_and_answers, get_shops]
+        delete_objects = PythonOperator(
+            task_id='deleted_objects_searching',
+            python_callable=deleted_objects_searching,
+            op_kwargs={'data_type': 'checks_and_answers'}
+        )        
+
+        [get_checks_and_answers, get_shops] >> delete_objects
 
     with TaskGroup('Формирование_слоя_DDS') as data_to_dds:
 
