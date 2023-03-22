@@ -218,16 +218,21 @@ def get_data(data_type, host, headers, engine, **context):
 
     params = None
 
-    start_date = context['execution_date'].date() - dt.timedelta(days=200)
+    start_date = context['execution_date'].date() - dt.timedelta(days=300)
     end_date = context['next_execution_date'].date()
 
     print('Запрашиваем данные за период', start_date, end_date)
 
     if data_type == 'checks_and_answers':
 
+        # params = {
+        #     'and': f'(last_modified_at.gt.{start_date}, last_modified_at.lt.{end_date})'
+        # }
+
         params = {
-            'and': f'(last_modified_at.gt.{start_date}, last_modified_at.lt.{end_date})'
-        }
+                'last_modified_at': f'gt.{start_date}'
+            }
+
 
     response = requests.get(
         data_types[data_type]['url'],
