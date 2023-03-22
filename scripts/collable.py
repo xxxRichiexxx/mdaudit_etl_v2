@@ -218,7 +218,7 @@ def get_data(data_type, host, headers, engine, **context):
 
     params = None
 
-    start_date = context['execution_date'].date() - dt.timedelta(days=30)
+    start_date = context['execution_date'].date() - dt.timedelta(days=90)
     end_date = context['next_execution_date'].date()
 
     print('Запрашиваем данные за период', start_date, end_date)
