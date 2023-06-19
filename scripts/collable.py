@@ -135,6 +135,9 @@ def shops(data, start_date, engine):
         'businessDirId': sa.sql.sqltypes.BIGINT,
         'lang': sa.sql.sqltypes.VARCHAR,
         'invited': sa.sql.sqltypes.BOOLEAN,
+        'shop_id': sa.sql.sqltypes.BIGINT,
+	    'createdAt': sa.sql.sqltypes.VARCHAR(250),
+	    'inviteAccepted': sa.sql.sqltypes.BOOLEAN,
     }
 
     print(df)
@@ -243,5 +246,4 @@ def get_data(data_type, host, headers, engine, **context):
     if not data:
         print('Нет данных.')
     else:
-
         data_types[data_type]['handler'](data, start_date, engine)
