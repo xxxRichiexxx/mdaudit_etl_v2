@@ -138,6 +138,7 @@ def shops(data, start_date, engine):
         'shop_id': sa.sql.sqltypes.BIGINT,
 	    'createdAt': sa.sql.sqltypes.VARCHAR(250),
 	    'inviteAccepted': sa.sql.sqltypes.BOOLEAN,
+        'inviteAcceptedAt': sa.sql.sqltypes.VARCHAR(250),
     }
 
     print(df)
