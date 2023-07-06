@@ -63,7 +63,8 @@ CREATE TABLE IF NOT EXISTS sttgaz.stage_mdaudit_dirs(
     level VARCHAR(250),
     businessDirId BIGINT,
     lang VARCHAR,
-    invited BOOLEAN       
+    invited BOOLEAN,
+    inviteAcceptedAt VARCHAR(100)  
 );
 
 CREATE TABLE IF NOT EXISTS sttgaz.stage_mdaudit_shops(
