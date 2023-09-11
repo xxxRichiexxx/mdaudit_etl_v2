@@ -154,7 +154,7 @@ with DAG(
                 VerticaOperator(
                     task_id=f'checking_dm_mdaudit_agregate_{number}',
                     vertica_conn_id='vertica',
-                    sql='scripts/checking_dm_mdaudit_agregate_№{number}.sql'
+                    sql=f'scripts/checking_dm_mdaudit_agregate_№{number}.sql'
                 )
             )
 
