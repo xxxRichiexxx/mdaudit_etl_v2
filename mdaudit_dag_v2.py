@@ -51,10 +51,10 @@ with DAG(
             task_id='get_checks_and_answers',
             python_callable=get_data,
             op_kwargs={
-            'data_type': 'checks_and_answers',
-            'host': api_con.host,
-            'headers': headers,
-            'engine': engine,
+                'data_type': 'checks_and_answers',
+                'host': api_con.host,
+                'headers': headers,
+                'engine': engine,
             }
         )
 
@@ -125,7 +125,13 @@ with DAG(
             sql='scripts/dm_mdaudit_answers.sql',
         )
 
-        [dm_mdaudit_detailed, dm_mdaudit_answers]
+        dm_mdaudit_agregate = VerticaOperator(
+            task_id='update_dm_mdaudit_agregate',
+            vertica_conn_id='vertica',
+            sql='scripts/dm_mdaudit_agregate.sql',
+        )
+
+        [dm_mdaudit_detailed, dm_mdaudit_answers, dm_mdaudit_agregate]
 
     with TaskGroup('Проверка_данных') as data_check:
 
@@ -141,7 +147,18 @@ with DAG(
             sql='scripts/checking_for_accuracy_of_execution.sql'
         )
 
-        [check_1, check_2]
+        checking_dm_mdaudit_agregate = []
+
+        for number in range(1,4):
+            checking_dm_mdaudit_agregate.append( 
+                VerticaOperator(
+                    task_id=f'checking_dm_mdaudit_agregate_№{number}',
+                    vertica_conn_id='vertica',
+                    sql='scripts/checking_dm_mdaudit_agregate_№{number}.sql'
+                )
+            )
+
+        [check_1, check_2].extend(checking_dm_mdaudit_agregate)
 
     end = DummyOperator(task_id='Конец')
 

@@ -1,16 +1,17 @@
 BEGIN TRANSACTION;
 
-DROP VIEW IF EXISTS sttgaz.dm_mdaudit_agregate;
-CREATE OR REPLACE VIEW sttgaz.dm_mdaudit_agregate AS
+DROP VIEW IF EXISTS sttgaz.dm_mdaudit_agregate_v;
+CREATE OR REPLACE VIEW sttgaz.dm_mdaudit_agregate_v AS
 WITH 
 	all_data AS(
 SELECT
 	d."Дата для агрегации",
 	d.template_name,
 	d.shop_sap,
-	d.shop_locality,
+	d.shop_locality,	
 	SUM(d."Фактическая оценка")*100 /SUM(d."Плановая оценка") 	AS "%"
 	FROM sttgaz.dm_mdaudit_detailed 							AS d
+	WHERE "Плановая оценка" <> 0
 	GROUP BY
 		d."Дата для агрегации",
 		d.template_name,
@@ -36,10 +37,9 @@ rabotos_avtootvetchik AS (
 		shop_sap,
 		shop_locality,
 		CASE
-			WHEN "%" > 0 AND "%" < 100 THEN 0
-			WHEN "%" = 0 THEN NULL 
+			WHEN "%" >= 0 AND "%" < 100 THEN 0
 			ELSE "%"
-		END 														AS "Работоспособность Автоответчика"
+		END 													AS "Работоспособность Автоответчика"
 	FROM all_data
 	WHERE template_name = 'ТП Автоответчик ДЦ'
 ),
@@ -49,8 +49,7 @@ rabotos_obratn_zvonok AS(
 		shop_sap,
 		shop_locality,
 		CASE
-			WHEN "%" > 0 AND "%" < 100 THEN 0
-			WHEN "%" = 0 THEN NULL 
+			WHEN "%" >= 0 AND "%" < 100 THEN 0
 			ELSE "%"
 		END 														AS "Работоспособность Обратного звонка"
 	FROM all_data
@@ -62,8 +61,7 @@ rabotos_online_cons AS(
 		shop_sap,
 		shop_locality,
 		CASE
-			WHEN "%" > 0 AND "%" < 100 THEN 0
-			WHEN "%" = 0 THEN NULL 
+			WHEN "%" >= 0 AND "%" < 100 THEN 0
 			ELSE "%"
 		END 														AS "Работоспособность Онлайн-консультант"
 	FROM all_data
@@ -96,7 +94,7 @@ LEFT JOIN rabotos_online_cons										AS oc
 	   HASH(oc."Дата для агрегации", oc.shop_sap, oc.shop_locality);
 
 
-GRANT SELECT ON TABLE sttgaz.dm_mdaudit_agregate TO PowerBI_Integration WITH GRANT OPTION;
-COMMENT ON VIEW sttgaz.dm_mdaudit_agregate IS 'Витрина с Четырьмя метриками для дилерских центров';
+GRANT SELECT ON TABLE sttgaz.dm_mdaudit_agregate_v TO PowerBI_Integration WITH GRANT OPTION;
+COMMENT ON VIEW sttgaz.dm_mdaudit_agregate_v IS 'Витрина с Четырьмя метриками для дилерских центров';
 
 COMMIT TRANSACTION;
