@@ -152,7 +152,7 @@ with DAG(
         for number in range(1,4):
             checking_dm_mdaudit_agregate.append( 
                 VerticaOperator(
-                    task_id=f'checking_dm_mdaudit_agregate_№{number}',
+                    task_id=f'checking_dm_mdaudit_agregate_{number}',
                     vertica_conn_id='vertica',
                     sql='scripts/checking_dm_mdaudit_agregate_№{number}.sql'
                 )
