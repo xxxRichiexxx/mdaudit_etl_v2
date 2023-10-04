@@ -23,7 +23,7 @@ koeff_sootv_visit_zvonok AS(
 		"Дата для агрегации",
 		shop_sap,
 		shop_locality,
-		AVG("%") 												AS "Коэффициент соответствия ВИЗИТ+ЗВОНОК"
+		ROUND(AVG("%"), 2)											AS "Коэффициент соответствия ВИЗИТ+ЗВОНОК"
 	FROM all_data
 	WHERE template_name IN ('ТП Звонок в ДЦ BUS', 'ТП Звонок в ДЦ LCV', 'ТП Визит в ДЦ BUS', 'ТП Визит в ДЦ LCV')
 	GROUP BY
@@ -36,7 +36,7 @@ koeff_sootv_visit AS(
 		"Дата для агрегации",
 		shop_sap,
 		shop_locality,
-		AVG("%") 												AS "Коэффициент соответствия ВИЗИТ"
+		ROUND(AVG("%"), 2)											AS "Коэффициент соответствия ВИЗИТ"
 	FROM all_data
 	WHERE template_name IN ('ТП Визит в ДЦ BUS', 'ТП Визит в ДЦ LCV')
 	GROUP BY
@@ -49,7 +49,7 @@ koeff_sootv_zvonok AS(
 		"Дата для агрегации",
 		shop_sap,
 		shop_locality,
-		AVG("%") 												AS "Коэффициент соответствия ЗВОНОК"
+		ROUND(AVG("%"), 2)											AS "Коэффициент соответствия ЗВОНОК"
 	FROM all_data
 	WHERE template_name IN ('ТП Звонок в ДЦ BUS', 'ТП Звонок в ДЦ LCV')
 	GROUP BY
@@ -100,7 +100,7 @@ proverka_znaniy AS(
 		shop_locality,
 		CASE
 			WHEN "%" >= 0 AND "%" < 80 THEN 0
-			ELSE "%"
+			ELSE ROUND("%", 2)
 		END 														AS "Проверка знаний"
 	FROM all_data
 	WHERE template_name iLIKE 'ПЗ%'
