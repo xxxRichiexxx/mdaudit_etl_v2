@@ -13,6 +13,19 @@ SELECT
 	s.active,
 	reg.region_id,
 	reg.region_name,
+	CASE
+		WHEN SPLIT_PART(s.sap, '-', 1) IN ('112', '212', '312', '412') THEN 'Беларусь'
+    	WHEN SPLIT_PART(s.sap, '-', 1) IN ('113', '213', '313', '413') THEN 'Казахстан'
+    	WHEN SPLIT_PART(s.sap, '-', 1) IN ('114', '214', '314', '414') THEN 'Армения'
+		WHEN SPLIT_PART(s.sap, '-', 1) IN ('115', '215', '315', '415') THEN 'Азербайджан'
+    	WHEN SPLIT_PART(s.sap, '-', 1) IN ('116', '216', '316', '416') THEN 'Грузия'
+    	WHEN SPLIT_PART(s.sap, '-', 1) IN ('117', '217', '317', '417') THEN 'Киргизия'
+    	WHEN SPLIT_PART(s.sap, '-', 1) IN ('118', '218', '318', '418') THEN 'Узбекистан'
+    	WHEN SPLIT_PART(s.sap, '-', 1) IN ('119', '219', '319', '419') THEN 'Преднестровье'
+    	WHEN SPLIT_PART(s.sap, '-', 1) IN ('120', '220', '320', '420') THEN 'Молдова'
+		WHEN SPLIT_PART(s.sap, '-', 1) IN ('000', '111', '211', '311', '411', '511', '5111', '611', '711') THEN 'РФ'
+		ELSE 'Прочее'
+	END															AS "country",
 	d.division_id,
 	d.division_name,
 	r.resolver_id,
@@ -66,3 +79,5 @@ WHERE a.answer <> 100
 	AND ("Дата для агрегации" > (NOW() - INTERVAL '13 MONTH'))
 	AND "Дата для агрегации" <> DATE_TRUNC('MONTH', NOW());
 	
+GRANT SELECT ON TABLE sttgaz.dm_mdaudit_detailed TO PowerBI_Integration WITH GRANT OPTION;
+COMMENT ON VIEW sttgaz.dm_mdaudit_detailed IS 'Витрина с детальными данными MD Audit';
