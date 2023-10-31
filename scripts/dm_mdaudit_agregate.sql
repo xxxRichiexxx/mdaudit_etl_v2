@@ -95,12 +95,12 @@ proverka_znaniy AS(
 	SELECT
 		"Дата для агрегации",
 		shop_sap,
-		CASE
-			WHEN "%" >= 0 AND "%" < 80 THEN 0
-			ELSE ROUND("%", 2)
-		END 														AS "Проверка знаний"
+		ROUND(AVG("%"), 2)											AS "Проверка знаний"
 	FROM all_data
 	WHERE template_name iLIKE 'ПЗ%'
+	GROUP BY
+		"Дата для агрегации",
+		shop_sap
 ),
 matrix AS(
 	SELECT DISTINCT "Дата для агрегации", shop_sap, shop_locality, division_name, region_name, country
