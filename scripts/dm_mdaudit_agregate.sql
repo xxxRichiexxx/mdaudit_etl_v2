@@ -115,45 +115,47 @@ SELECT
 	m.country,
 	"Коэффициент соответствия ВИЗИТ+ЗВОНОК",
 	"Коэффициент соответствия ВИЗИТ",
-	AVG("Коэффициент соответствия ВИЗИТ") OVER (PARTITION BY m."Дата для агрегации", m.region_name)					AS "Коэффициент соответствия ВИЗИТ по региону",
-	AVG("Коэффициент соответствия ВИЗИТ") OVER (PARTITION BY m."Дата для агрегации", m.division_name, m.country)	AS "Коэффициент соответствия ВИЗИТ по стране",
+	AVG("Коэффициент соответствия ВИЗИТ") OVER region_window			AS "Коэффициент соответствия ВИЗИТ по региону",
+	AVG("Коэффициент соответствия ВИЗИТ") OVER country_window			AS "Коэффициент соответствия ВИЗИТ по стране",
 	"Коэффициент соответствия ЗВОНОК",
-	AVG("Коэффициент соответствия ЗВОНОК") OVER (PARTITION BY m."Дата для агрегации", m.region_name) 				AS "Коэффициент соответствия ЗВОНОК по региону",
-	AVG("Коэффициент соответствия ЗВОНОК") OVER (PARTITION BY m."Дата для агрегации", m.division_name, m.country) 	AS "Коэффициент соответствия ЗВОНОК по стране",
+	AVG("Коэффициент соответствия ЗВОНОК") OVER region_window 			AS "Коэффициент соответствия ЗВОНОК по региону",
+	AVG("Коэффициент соответствия ЗВОНОК") OVER country_window 			AS "Коэффициент соответствия ЗВОНОК по стране",
 	"Работоспособность Автоответчика",
-	AVG("Работоспособность Автоответчика") OVER (PARTITION BY m."Дата для агрегации", m.region_name) 				AS "Работоспособность Автоответчика по региону",
-	AVG("Работоспособность Автоответчика") OVER (PARTITION BY m."Дата для агрегации", m.division_name, m.country) 	AS "Работоспособность Автоответчика по стране",
+	AVG("Работоспособность Автоответчика") OVER region_window 			AS "Работоспособность Автоответчика по региону",
+	AVG("Работоспособность Автоответчика") OVER country_window 			AS "Работоспособность Автоответчика по стране",
 	"Работоспособность Обратного звонка",
-	AVG("Работоспособность Обратного звонка") OVER (PARTITION BY m."Дата для агрегации", m.region_name) 			AS "Работоспособность Обратного звонка по региону",
-	AVG("Работоспособность Обратного звонка") OVER (PARTITION BY m."Дата для агрегации", m.division_name, m.country) AS "Работоспособность Обратного звонка по стране",
+	AVG("Работоспособность Обратного звонка") OVER region_window 		AS "Работоспособность Обратного звонка по региону",
+	AVG("Работоспособность Обратного звонка") OVER country_window 		AS "Работоспособность Обратного звонка по стране",
 	"Работоспособность Онлайн-консультант",
-	AVG("Работоспособность Онлайн-консультант") OVER (PARTITION BY m."Дата для агрегации", m.region_name) 			AS "Работоспособность Онлайн-консультант по региону",
-	AVG("Работоспособность Онлайн-консультант") OVER (PARTITION BY m."Дата для агрегации", m.division_name, m.country) AS "Работоспособность Онлайн-консультант по стране",
+	AVG("Работоспособность Онлайн-консультант") OVER region_window 		AS "Работоспособность Онлайн-консультант по региону",
+	AVG("Работоспособность Онлайн-консультант") OVER country_window 	AS "Работоспособность Онлайн-консультант по стране",
 	"Проверка знаний",
-	AVG("Проверка знаний") OVER (PARTITION BY m."Дата для агрегации", m.region_name) 								AS "Проверка знаний по региону",
-	AVG("Проверка знаний") OVER (PARTITION BY m."Дата для агрегации", m.division_name, m.country) 					AS "Проверка знаний по стране"
-FROM matrix															AS m
-LEFT JOIN koeff_sootv_visit_zvonok 									AS vs
+	AVG("Проверка знаний") OVER region_window 							AS "Проверка знаний по региону",
+	AVG("Проверка знаний") OVER country_window 							AS "Проверка знаний по стране"
+FROM matrix																AS m
+LEFT JOIN koeff_sootv_visit_zvonok 										AS vs
 	ON HASH(m."Дата для агрегации", m.shop_sap) = 
 	   HASH(vs."Дата для агрегации", vs.shop_sap)
-LEFT JOIN koeff_sootv_zvonok 										AS s
+LEFT JOIN koeff_sootv_zvonok 											AS s
 	ON HASH(m."Дата для агрегации", m.shop_sap) = 
 	   HASH(s."Дата для агрегации", s.shop_sap)
-LEFT JOIN koeff_sootv_visit											AS v
+LEFT JOIN koeff_sootv_visit												AS v
 	ON HASH(m."Дата для агрегации", m.shop_sap) = 
 	   HASH(v."Дата для агрегации", v.shop_sap)
-LEFT JOIN rabotos_avtootvetchik										AS a
+LEFT JOIN rabotos_avtootvetchik											AS a
 	ON HASH(m."Дата для агрегации", m.shop_sap) = 
 	   HASH(a."Дата для агрегации", a.shop_sap)
-LEFT JOIN rabotos_obratn_zvonok										AS oz
+LEFT JOIN rabotos_obratn_zvonok											AS oz
 	ON HASH(m."Дата для агрегации", m.shop_sap) = 
 	   HASH(oz."Дата для агрегации", oz.shop_sap)
-LEFT JOIN proverka_znaniy											AS pz
+LEFT JOIN proverka_znaniy												AS pz
 	ON HASH(m."Дата для агрегации", m.shop_sap) = 
 	   HASH(pz."Дата для агрегации", pz.shop_sap)
-LEFT JOIN rabotos_online_cons										AS oc
+LEFT JOIN rabotos_online_cons											AS oc
 	ON HASH(m."Дата для агрегации", m.shop_sap) = 
-	   HASH(oc."Дата для агрегации", oc.shop_sap);
+	   HASH(oc."Дата для агрегации", oc.shop_sap)
+WINDOW region_window AS (PARTITION BY m."Дата для агрегации", m.division_name, m.region_name),
+	   country_window AS (PARTITION BY m."Дата для агрегации", m.division_name, m.country);
 
 
 GRANT SELECT ON TABLE sttgaz.dm_mdaudit_agregate_v TO PowerBI_Integration WITH GRANT OPTION;
